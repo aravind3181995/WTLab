@@ -1,0 +1,125 @@
+<html>
+	<head>
+		<style>
+			.input-w label {
+				display: inline-block;
+				vertical-align: middle;    
+			}
+
+			.input-w input {
+				display: inline-block;
+				vertical-align: middle;
+			}
+			.input-w select {
+				display: inline-block;
+				vertical-align: middle;
+			}
+		</style>
+		<script>
+			function getSeats(){
+				init();
+				var xhttp = new XMLHttpRequest();
+			  	xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+				  		var seats = xhttp.responseText;
+				  		colleges = seats.split(";");
+				  		heading = "PESIT: CSE - "+colleges[0]+", ECE - "+colleges[1]+"| RVCE: CSE - "+colleges[2]+", ECE - "+colleges[3];
+				  		document.getElementById("header").innerHTML = heading;
+					}	
+			  	};
+			  	xhttp.open("GET", "seats.txt", true);
+			  	xhttp.send();
+			}
+			function updateSeats(){
+				var cet = document.getElementById("cet").value;
+				var college = document.getElementById("college").value;
+				console.log(college);
+				var dept = document.getElementById("dept").value;
+				var xhttp = new XMLHttpRequest();
+				xhttp.onreadystatechange = function() {
+					if (xhttp.readyState == 4 && xhttp.status == 200) {
+				  		console.log(xhttp.responseText);
+					}	
+			  	};
+			  	xhttp.open("GET", "update.php?college="+college+"&dept="+dept, true);
+			  	xhttp.send();
+			}
+			var periodicXHR;
+			var time;
+			var v;
+			function init()
+			{
+				
+				periodicXHR = new XMLHttpRequest();
+				periodicXHR.timeout=6000;
+				time=1;
+				periodicXHR.ontimeout=function()
+				{
+					console.log("TIMEOUT");
+					clearTimeout(v);
+					time=time*2;
+					periodicXHR.abort();
+					v=setTimeout(makerequest,time*periodicXHR.timeout);
+				}
+				periodicXHR.onreadystatechange = function() {
+					
+					if(periodicXHR.readyState == 4 && periodicXHR.status == 200){
+						clearTimeout(v);
+						time=1;
+						console.log("G",v);
+						v=setTimeout(makerequest,10000);
+						var seats = periodicXHR.responseText;
+				  		colleges = seats.split(";");
+				  		heading = "PESIT: CSE - "+colleges[0]+", ECE - "+colleges[1]+"| RVCE: CSE - "+colleges[2]+", ECE - "+colleges[3];
+				  		document.getElementById("header").innerHTML = heading;
+				  		periodicXHR.abort();
+					}
+				
+				}
+				v=setTimeout(makerequest,10000);
+				
+			}
+			
+			function makerequest()
+			{
+				console.log("here");
+				periodicXHR.open("GET","seats.php",true);
+				periodicXHR.send();
+				console.log(periodicXHR.onreadystatechange);
+				
+			}
+		</script>
+	</head>
+	<body onload = "getSeats()">
+		<center><h3>
+			<div id = "header">
+			</div>
+		</center></h3>
+		<hr>
+		<h3>MAKE YOUR CHOICE PLIS</h3>
+		<br>
+		<div class="input-w">
+			<label><h4>HALL TKT. NUM.:</h4></label>
+			<input id = "cet" />
+		</div>
+		<br>
+		<div class="input-w">
+			<label><h4>COLLEGE:</h4></label>
+			<select id = "college">
+				<option value="pes">PESIT</option>
+				<option value="rv">RV</option>
+			</select>
+		</div>
+		<br>
+		<div class="input-w">
+			<label><h4>DEPARTMENT:</h4></label>
+			<select id = "dept">
+				<option value="cs">Computer Science</option>
+				<option value="ece">Electronics and Communication</option>
+			</select>
+		</div>
+		<br><br>
+		<button onclick = "updateSeats()">SUBMIT</button>
+	</body>
+</html>
+
